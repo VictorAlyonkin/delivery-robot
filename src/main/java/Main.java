@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Main {
+    public static final Map<Integer, Integer> sizeToFreq = new HashMap<>();
     public static void main(String[] args) {
-        Map<Integer, Integer> sizeToFreq = new HashMap<>();
         for (int i = 0; i < 1000; i++) {
             new Thread(() -> {
                 synchronized (sizeToFreq) {
