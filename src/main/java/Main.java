@@ -1,26 +1,49 @@
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class Main {
     public static final Map<Integer, Integer> sizeToFreq = new HashMap<>();
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws InterruptedException {
+        List<Thread> threads = new ArrayList<>();
+
+        Thread threadPrintMax = new Thread(() -> {
+            while (!Thread.interrupted()) {
+                synchronized (sizeToFreq) {
+                    try {
+                        sizeToFreq.wait();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                    printMaxValue();
+                }
+            }
+        });
+
+        threadPrintMax.start();
+
         for (int i = 0; i < 1000; i++) {
-            new Thread(() -> {
+            threads.add(new Thread(() -> {
                 synchronized (sizeToFreq) {
                     String way = generateRoute("RLRFR", 100);
                     int cnt = getCountLetter(way);
                     sizeToFreq.merge(cnt, 1, Integer::sum);
+                    sizeToFreq.notify();
                 }
-            }).start();
+            }));
         }
 
-        int maxValue = printMaxValue(sizeToFreq);
-        sizeToFreq.forEach((key, value) -> {
-            if (!value.equals(maxValue))
-                System.out.println("- " + key + " (" + value + " раз)");
-        });
+        for (Thread thread : threads) {
+            thread.start();
+            Thread.sleep(1);
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        threadPrintMax.interrupt();
+
+        sizeToFreq.forEach((key, value) -> System.out.println("- " + key + " (" + value + " раз)"));
     }
 
     public static String generateRoute(String letters, int length) {
@@ -41,7 +64,7 @@ public class Main {
         return cnt;
     }
 
-    public static int printMaxValue(Map<Integer, Integer> sizeToFreq) {
+    public static int printMaxValue() {
         Map.Entry<Integer, Integer> maxValue = null;
         for (Map.Entry<Integer, Integer> price : sizeToFreq.entrySet()) {
             if (maxValue == null || price.getValue().compareTo(maxValue.getValue()) > 0) {
