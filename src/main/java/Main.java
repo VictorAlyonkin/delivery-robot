@@ -16,7 +16,7 @@ public class Main {
             }).start();
         }
 
-        int maxValue = printMaxValue(sizeToFreq);
+        int maxValue = printMaxValue();
         sizeToFreq.forEach((key, value) -> {
             if (!value.equals(maxValue))
                 System.out.println("- " + key + " (" + value + " раз)");
@@ -41,7 +41,7 @@ public class Main {
         return cnt;
     }
 
-    public static int printMaxValue(Map<Integer, Integer> sizeToFreq) {
+    public static int printMaxValue() {
         Map.Entry<Integer, Integer> maxValue = null;
         for (Map.Entry<Integer, Integer> price : sizeToFreq.entrySet()) {
             if (maxValue == null || price.getValue().compareTo(maxValue.getValue()) > 0) {
